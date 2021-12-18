@@ -21,6 +21,7 @@ namespace Astrum.AstralCore.UI.Attributes
     public class UIButton : UIBaseAttribute
     {
         public void Click() => OnClick();
+
         public UIButton(string module, string name) : base(module, name) { }
 
         internal Action OnClick;
@@ -37,6 +38,8 @@ namespace Astrum.AstralCore.UI.Attributes
         public abstract T Value { get; set; }
 
         public Func<T, bool> Validator;
+
+        public virtual T FromString(string val) => Value = MelonLoader.TinyJSON.Decoder.Decode(val).Make<T>();
 
         public UIFieldProp(string module, string name) : base(module, name) { }
         public UIFieldProp(string module, string name, Func<T, bool> validator) : base(module, name) => Validator = validator;
