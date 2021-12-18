@@ -5,7 +5,7 @@ namespace Astrum.AstralCore.UI
 {
     public class Module
     {
-        public Dictionary<string, UIBaseAttribute> Commands;
+        public Dictionary<string, UIBase> Commands;
 
         // in the future we can add metadata
     }

@@ -3,22 +3,22 @@ using System.Reflection;
 
 namespace Astrum.AstralCore.UI.Attributes
 {
-    public class UIBaseAttribute : Attribute
+    public class UIBase : Attribute
     {
         public string Module;
         public string Name;
 
-        public UIBaseAttribute(string module, string name) => (Module, Name) = (module, name);
+        public UIBase(string module, string name) => (Module, Name) = (module, name);
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class UIRawAttribute : UIBaseAttribute
+    public class UIRaw : UIBase
     {
-        public UIRawAttribute(string module, string name) : base(module, name) { }
+        public UIRaw(string module, string name) : base(module, name) { }
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class UIButton : UIBaseAttribute
+    public class UIButton : UIBase
     {
         public void Click() => OnClick();
 
@@ -33,7 +33,7 @@ namespace Astrum.AstralCore.UI.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public abstract class UIFieldProp<T> : UIBaseAttribute
+    public abstract class UIFieldProp<T> : UIBase
     {
         public abstract T Value { get; set; }
 

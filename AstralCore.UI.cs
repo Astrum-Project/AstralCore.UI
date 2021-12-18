@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Astrum.AstralCore.UI.Attributes;
 
-[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.1.0", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
+[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.1.1", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
 namespace Astrum.AstralCore.UI
@@ -29,14 +29,14 @@ namespace Astrum.AstralCore.UI
 
             OnPreScan();
 
-            foreach ((MemberInfo info, UIBaseAttribute attr) in MelonHandler.Mods
+            foreach ((MemberInfo info, UIBase attr) in MelonHandler.Mods
                 .Select(x => x.Assembly)
                 .SelectMany(x => x.GetExportedTypes())
                 .SelectMany(x => x.GetMembers())
-                .SelectMany(x => x.GetCustomAttributes(typeof(UIBaseAttribute), false).Select(y => (x, y as UIBaseAttribute))))
+                .SelectMany(x => x.GetCustomAttributes(typeof(UIBase), false).Select(y => (x, y as UIBase))))
             {
                 if (!Modules.TryGetValue(attr.Module, out var module))
-                    module = Modules[attr.Module] = new Module() { Commands = new Dictionary<string, UIBaseAttribute>(StringComparer.OrdinalIgnoreCase) };
+                    module = Modules[attr.Module] = new Module() { Commands = new Dictionary<string, UIBase>(StringComparer.OrdinalIgnoreCase) };
 
                 try 
                 {
