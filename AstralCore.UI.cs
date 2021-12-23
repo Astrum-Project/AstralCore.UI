@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Astrum.AstralCore.UI.Attributes;
 
-[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.2.0", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
+[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.3.0", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
 namespace Astrum.AstralCore.UI
@@ -14,8 +14,7 @@ namespace Astrum.AstralCore.UI
     public class CoreUI : MelonMod
     {
         public static readonly Dictionary<string, Module> Modules = new(StringComparer.OrdinalIgnoreCase);
-        public static event Action OnPreScan = new(() => { });
-        public static event Action OnRescan = new(() => { });
+        public static event Action<string, UIBase> OnElementRegistered = new((_, __) => { });
 
         public override void OnApplicationLateStart() => Rescan();
 
@@ -27,14 +26,10 @@ namespace Astrum.AstralCore.UI
 
             Modules.Clear();
 
-            OnPreScan(); // this is for if you want to scan your own assembly that isn't a mod (WorldMods)
-
             MelonHandler.Mods.ForEach(x => ScanAssembly(x.Assembly));
 
             sw.Stop();
             Logger.Debug("[Core.UI] Scanned in " + sw.ElapsedMilliseconds + " ms");
-
-            OnRescan(); // this is for recalculating your UI (UI.Wings)
         }
 
         public static void ScanAssembly(Assembly assembly)
