@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Astrum.AstralCore.UI.Attributes;
 
-[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.3.0", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
+[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.3.1", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
 namespace Astrum.AstralCore.UI

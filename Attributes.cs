@@ -53,6 +53,7 @@ namespace Astrum.AstralCore.UI.Attributes
             get => _value;
             set
             {
+                if (_value.Equals(value)) return;
                 if (!(Validator?.Invoke(value) ?? true))
                     return;
 
