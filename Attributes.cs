@@ -20,16 +20,18 @@ namespace Astrum.AstralCore.UI.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public class UIButton : UIBase
     {
-        public void Click() => OnClick();
+        internal Action OnClick;
 
         public UIButton(string module, string name) : base(module, name) { }
 
-        internal Action OnClick;
-        internal void Setup(MethodInfo info)
+        public UIButton Setup(MethodInfo info)
         {
             Logger.Trace($"[Core.UI] Button {Module}:{Name}");
             OnClick = (Action)Delegate.CreateDelegate(typeof(Action), info);
+            return this;
         }
+
+        public void Click() => OnClick();
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
@@ -39,10 +41,10 @@ namespace Astrum.AstralCore.UI.Attributes
 
         public Func<T, bool> Validator;
 
-        public virtual T FromString(string val) => Value = MelonLoader.TinyJSON.Decoder.Decode(val).Make<T>();
-
         public UIFieldProp(string module, string name) : base(module, name) { }
         public UIFieldProp(string module, string name, Func<T, bool> validator) : base(module, name) => Validator = validator;
+        
+        public virtual T FromString(string val) => Value = MelonLoader.TinyJSON.Decoder.Decode(val).Make<T>();
     }
 
     [AttributeUsage(AttributeTargets.Field)]
@@ -64,19 +66,21 @@ namespace Astrum.AstralCore.UI.Attributes
 
         public new Func<T, bool> Validator;
 
+        internal T _value;
+        internal FieldInfo Info;
+
         public UIField(string module, string name) : base(module, name) { }
         public UIField(string module, string name, Func<T, bool> validator) : base(module, name) => Validator = validator;
 
-        public T Refresh() => _value = (T)Info.GetValue(null);
-
-        internal T _value;
-        internal FieldInfo Info;
-        internal void Setup(FieldInfo info)
+        public UIField<T> Setup(FieldInfo info)
         {
             Logger.Trace($"[Core.UI] Field {Module}:{Name}");
             _value = (T)info.GetValue(null);
             Info = info;
+            return this;
         }
+
+        public T Refresh() => _value = (T)Info.GetValue(null);
     }
 
     [AttributeUsage(AttributeTargets.Property)]
@@ -90,16 +94,18 @@ namespace Astrum.AstralCore.UI.Attributes
 
         public new Func<T, bool> Validator;
 
+        internal Func<T> _get;
+        internal Action<T> _set;
+
         public UIProperty(string module, string name) : base(module, name) { }
         public UIProperty(string module, string name, Func<T, bool> validator) : base(module, name) => Validator = validator;
 
-        internal Func<T> _get;
-        internal Action<T> _set;
-        internal void Setup(PropertyInfo prop)
+        public UIProperty<T> Setup(PropertyInfo prop)
         {
             Logger.Trace($"[Core.UI] Property {Module}:{Name}");
             _get = (Func<T>)Delegate.CreateDelegate(typeof(Func<T>), prop.GetGetMethod());
             _set = (Action<T>)Delegate.CreateDelegate(typeof(Action<T>), prop.GetSetMethod());
+            return this;
         }
     }
 }
