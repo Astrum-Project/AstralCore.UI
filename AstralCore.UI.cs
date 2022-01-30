@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Astrum.AstralCore.UI.Attributes;
 
-[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.4.0", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
+[assembly: MelonInfo(typeof(Astrum.AstralCore.UI.CoreUI), "AstralCore.UI", "1.5.0", downloadLink: "github.com/Astrum-Project/AstralCore.UI")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
 namespace Astrum.AstralCore.UI
@@ -14,6 +14,11 @@ namespace Astrum.AstralCore.UI
     public class CoreUI : MelonMod
     {
         public static readonly Dictionary<string, Module> Modules = new(StringComparer.OrdinalIgnoreCase);
+
+        public static event Action<Module> ModuleCreated = new(_ => { });
+        public static event Action<Module> ModuleRemoved = new(_ => { });
+        public static event Action<Module, UIBase> CommandRegistered = new((_, __) => { });
+        public static event Action<Module, UIBase> CommandUnregistered = new((_, __) => { });
 
         public override void OnApplicationLateStart()
         {
@@ -37,12 +42,12 @@ namespace Astrum.AstralCore.UI
                 .SelectMany(x => x.GetCustomAttributes(typeof(UIBase), false).Select(y => (x, y as UIBase))))
             {
                 if (!Modules.TryGetValue(attr.Module, out var module))
-                    module = Modules[attr.Module] = new Module() { Commands = new Dictionary<string, UIBase>(StringComparer.OrdinalIgnoreCase) };
+                    ModuleCreated(module = CreateModule(attr.Module));
 
                 try { attr.GetType().GetMethod("Setup").Invoke(attr, new object[1] { info }); }
                 catch { Logger.Error($"An exception has occurred whilst setting up {attr.Module}:{attr.Name}"); }
 
-                module.Commands[attr.Name] = attr;
+                CommandRegistered(module, module.Commands[attr.Name] = attr);
             }
         }
 
@@ -52,9 +57,9 @@ namespace Astrum.AstralCore.UI
                 throw new Exception("Element was not setup prior to registration");
 
             if (!Modules.TryGetValue(elem.Module, out Module module))
-                module = Modules[elem.Module] = new Module() { Commands = new Dictionary<string, UIBase>(StringComparer.OrdinalIgnoreCase) };
+                ModuleCreated(module = CreateModule(elem.Module));
 
-            module.Commands[elem.Name] = elem;
+            CommandRegistered(module, module.Commands[elem.Name] = elem);
         }
 
         public static bool Unregister(UIBase elem)
@@ -68,12 +73,20 @@ namespace Astrum.AstralCore.UI
         public static bool Unregister(string moduleName, string elemName)
         {
             if (!Modules.TryGetValue(moduleName, out Module module)) return false;
-            if (!module.Commands.ContainsKey(elemName)) return false;
 
-            module.Commands.Remove(elemName);
-            if (module.Commands.Count <= 0)
-                Modules.Remove(moduleName);
-            return false;
+            if (module.Commands.TryGetValue(elemName, out var command))
+            {
+                module.Commands.Remove(elemName);
+                CommandUnregistered(module, command);
+            }
+            else return false;
+
+            if (module.Commands.Count <= 0 && Modules.Remove(moduleName))
+                ModuleRemoved(module);
+
+            return true;
         }
+
+        private static Module CreateModule(string name) => Modules[name] = new Module() { Commands = new Dictionary<string, UIBase>(StringComparer.OrdinalIgnoreCase) };
     }
 }
